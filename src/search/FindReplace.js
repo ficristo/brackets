@@ -525,16 +525,48 @@ define(function (require, exports, module) {
                 return;
             }
 
-            // Find *all* matches, searching from start of document
-            // (Except on huge documents, where this is too expensive)
-            var cursor = getSearchCursor(cm, state);
-            if (cm.getValue().length <= FIND_MAX_FILE_SIZE) {
-                // FUTURE: if last query was prefix of this one, could optimize by filtering last result set
-                state.resultSet = [];
-                while (cursor.findNext()) {
-                    state.resultSet.push(cursor.pos);  // pos is unique obj per search result
+            var cursor;
+            var value;
+            var needsUIUpdate = false;
+            if (state.queryInfo.isInSelection) {
+                var listSelections = findBar.getOptions().initialListSelections;
+                console.log(listSelections);
+                if (listSelections.length !== 1) {
+                    console.log("listSelections.length !== 1");
+                    return;
                 }
 
+                var selection = listSelections[0];
+                var start = selection.head;
+                var end = selection.anchor;
+                cursor = getSearchCursor(cm, state, start);
+
+                var selections = cm.getSelections();
+                value = selections.join();
+
+                if (value.length <= FIND_MAX_FILE_SIZE) {
+                    // FUTURE: if last query was prefix of this one, could optimize by filtering last result set
+                    state.resultSet = [];
+                    while (cursor.findNext() && CodeMirror.cmpPos(cursor.to(), end) <= 0) {
+                        state.resultSet.push(cursor.pos);  // pos is unique obj per search result
+                    }
+                    needsUIUpdate = true;
+                }
+            } else {
+                // Find *all* matches, searching from start of document
+                // (Except on huge documents, where this is too expensive)
+                cursor = getSearchCursor(cm, state);
+                if (cm.getValue().length <= FIND_MAX_FILE_SIZE) {
+                    // FUTURE: if last query was prefix of this one, could optimize by filtering last result set
+                    state.resultSet = [];
+                    while (cursor.findNext()) {
+                        state.resultSet.push(cursor.pos);  // pos is unique obj per search result
+                    }
+                    needsUIUpdate = true;
+                }
+            }
+
+            if (needsUIUpdate) {
                 // Highlight all matches if there aren't too many
                 if (state.resultSet.length <= FIND_HIGHLIGHT_MAX) {
                     toggleHighlighting(editor, true);
@@ -624,7 +656,8 @@ define(function (require, exports, module) {
             replace: replace,
             initialQuery: initialQuery.query,
             initialReplaceText: initialQuery.replaceText,
-            queryPlaceholder: Strings.FIND_QUERY_PLACEHOLDER
+            queryPlaceholder: Strings.FIND_QUERY_PLACEHOLDER,
+            initialListSelections: cm.listSelections()
         });
         findBar.open();
 

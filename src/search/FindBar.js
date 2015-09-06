@@ -88,7 +88,8 @@ define(function (require, exports, module) {
             queryPlaceholder: "",
             initialQuery: "",
             initialReplaceText: "",
-            scopeLabel: ""
+            scopeLabel: "",
+            initialListSelections: []
         };
         this._options = _.extend(defaults, options);
         this._closed = false;
@@ -202,6 +203,7 @@ define(function (require, exports, module) {
         // toggleClass expects literal true/false.
         this.$("#find-case-sensitive").toggleClass("active", !!PreferencesManager.getViewState("caseSensitive"));
         this.$("#find-regexp").toggleClass("active", !!PreferencesManager.getViewState("regexp"));
+        this.$("#find-selection").toggleClass("active", !!PreferencesManager.getViewState("selection"));
     };
 
     /**
@@ -211,6 +213,7 @@ define(function (require, exports, module) {
     FindBar.prototype._updatePrefsFromSearchBar = function () {
         PreferencesManager.setViewState("caseSensitive", this.$("#find-case-sensitive").is(".active"));
         PreferencesManager.setViewState("regexp",        this.$("#find-regexp").is(".active"));
+        PreferencesManager.setViewState("selection",     this.$("#find-selection").is(".active"));
     };
 
     /**
@@ -272,7 +275,7 @@ define(function (require, exports, module) {
                 self.trigger("queryChange");
                 lastTypedText = self.getQueryInfo().query;
             })
-            .on("click", "#find-case-sensitive, #find-regexp", function (e) {
+            .on("click", "#find-case-sensitive, #find-regexp, #find-selection", function (e) {
                 $(e.currentTarget).toggleClass("active");
                 self._updatePrefsFromSearchBar();
                 self.trigger("queryChange");
@@ -408,13 +411,14 @@ define(function (require, exports, module) {
 
     /**
      * Returns the current query and parameters.
-     * @return {{query: string, caseSensitive: boolean, isRegexp: boolean}}
+     * @return {{query: string, isCaseSensitive: boolean, isRegexp: boolean, isInSelection: boolean}}
      */
     FindBar.prototype.getQueryInfo = function () {
         return {
             query:           this.$("#find-what").val() || "",
             isCaseSensitive: this.$("#find-case-sensitive").is(".active"),
-            isRegexp:        this.$("#find-regexp").is(".active")
+            isRegexp:        this.$("#find-regexp").is(".active"),
+            isInSelection:   this.$("#find-selection").is(".active")
         };
     };
 
@@ -477,7 +481,7 @@ define(function (require, exports, module) {
      * @param {boolean} enable Whether to enable or disable the controls.
      */
     FindBar.prototype.enable = function (enable) {
-        this.$("#find-what, #replace-with, #find-prev, #find-next, #find-case-sensitive, #find-regexp").prop("disabled", !enable);
+        this.$("#find-what, #replace-with, #find-prev, #find-next, #find-case-sensitive, #find-regexp, #find-selection").prop("disabled", !enable);
         this._enabled = enable;
     };
 
