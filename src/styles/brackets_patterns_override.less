@@ -1410,7 +1410,7 @@ input[type="color"],
     background-color: @bc-input-bg;
     border: 1px solid @bc-btn-border;
     color: @bc-text-thin;
-    font-size: (@baseFontSize + 1px);
+    font-size: (@font-size-base + 1px);
     font-weight: normal;
     -webkit-font-smoothing: antialiased;
     box-shadow: inset 0 1px 0 @bc-shadow-small;
@@ -1548,7 +1548,7 @@ input[type="color"],
     background-color: @bc-btn-bg;
     color: @bc-text;
     cursor: default;
-    font-size: (@baseFontSize + 1);
+    font-size: (@font-size-base + 1);
     font-weight: @font-weight-semibold;
     line-height: normal;
     border: 1px solid @bc-btn-border;
@@ -1708,11 +1708,11 @@ input[type="color"],
 
     // Button Sizes
     &.large {
-        font-size: (@baseFontSize + 1px);
+        font-size: (@font-size-base + 1px);
         border-radius: @bc-border-radius;
     }
     &.small {
-        font-size: (@baseFontSize - 1px);
+        font-size: (@font-size-base - 1px);
     }
 }
 
